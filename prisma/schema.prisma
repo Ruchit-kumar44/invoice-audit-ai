@@ -12,3 +12,123 @@ datasource db {
   provider = "postgresql"
 }
 
+// 🗂️ 1. DATA ENUMS
+
+enum InvoiceStatus {
+  UPLOADED
+  EXTRACTING
+  NEEDS_REVIEW
+  APPROVED
+  REJECTED
+  EXTRACTION_FAILED
+}
+
+enum FlagSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+enum FlagStatus {
+  OPEN
+  DISMISSED
+  RESOLVED
+}
+
+enum AuditRule {
+  LINE_ITEMS_SUM_MISMATCH
+  TOTAL_MISMATCH
+  DUPLICATE_INVOICE
+  UNUSUAL_AMOUNT
+}
+
+//  DATA MODELS WITH SNAKE_CASE MAPS
+
+model Vendor {
+  id             String   @id @default(uuid()) @map("id")
+  organizationId String   @map("organization_id")
+  name           String   @map("name")
+  normalizedName String   @map("normalized_name")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  // Relations
+  invoices Invoice[]
+
+  @@unique([organizationId, normalizedName])
+  @@index([organizationId])
+  @@map("vendors") // Maps PascalCase Model to snake_case table
+}
+
+model Invoice {
+  id              String        @id @default(uuid()) @map("id")
+  organizationId  String        @map("organization_id")
+  uploadedById    String        @map("uploaded_by_id")
+  vendorId        String?       @map("vendor_id")
+  status          InvoiceStatus @default(UPLOADED) @map("status")
+  invoiceNumber   String?       @map("invoice_number")
+  invoiceDate     DateTime?     @map("invoice_date") @db.Date
+  dueDate         DateTime?     @map("due_date") @db.Date
+  currency        String?       @map("currency")
+  subtotalCents   Int?          @map("subtotal_cents")
+  taxCents        Int?          @map("tax_cents")
+  totalCents      Int?          @map("total_cents")
+  fileUrl         String        @map("file_url")
+  fileName        String        @map("file_name")
+  mimeType        String        @map("mime_type")
+  fileHash        String        @map("file_hash")
+  aiExtraction    Json?         @map("ai_extraction")
+  fieldConfidence Json?         @map("field_confidence")
+  errorMessage    String?       @map("error_message")
+  reviewedById    String?       @map("reviewed_by_id")
+  reviewedAt      DateTime?     @map("reviewed_at")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  vendor     Vendor?           @relation(fields: [vendorId], references: [id], onDelete: Restrict)
+  lineItems  InvoiceLineItem[]
+  auditFlags AuditFlag[]
+
+  @@index([organizationId, status])
+  @@index([organizationId, invoiceDate])
+  @@index([organizationId, vendorId])
+  @@index([organizationId, vendorId, invoiceNumber])
+  @@index([organizationId, fileHash])
+  @@map("invoices")
+}
+
+model InvoiceLineItem {
+  id             String  @id @default(uuid()) @map("id")
+  organizationId String  @map("organization_id")
+  invoiceId      String  @map("invoice_id")
+  position       Int     @map("position")
+  description    String  @map("description")
+  quantity       Decimal @map("quantity") @db.Decimal(12, 4)
+  unitPriceCents Int     @map("unit_price_cents")
+  amountCents    Int     @map("amount_cents")
+
+  // Relations
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+  @@map("invoice_line_items")
+}
+
+model AuditFlag {
+  id             String       @id @default(uuid()) @map("id")
+  organizationId String       @map("organization_id")
+  invoiceId      String       @map("invoice_id")
+  rule           AuditRule    @map("rule")
+  severity       FlagSeverity @map("severity")
+  status         FlagStatus   @default(OPEN) @map("status")
+  description    String       @map("description")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  // Relations
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, status])
+  @@index([invoiceId])
+  @@map("audit_flags")
+}
