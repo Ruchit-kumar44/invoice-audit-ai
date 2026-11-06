@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { LoginForm } from "@/components/auth/login";
+import { redirectIfSignedIn } from "@/features/auth/session";
 
 
 export default async function LoginPage() {
+    await redirectIfSignedIn();
 
   return (
     <div className="space-y-6 bg-white/7 p-5 rounded-xl">
