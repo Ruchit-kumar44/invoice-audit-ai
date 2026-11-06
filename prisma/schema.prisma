@@ -135,7 +135,7 @@ model AuditFlag {
 
   // Relations
   invoice      Invoice      @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-  organization Organization @relation(fields: [organizationId], references: [id])
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([organizationId, status])
   @@index([invoiceId])
@@ -143,15 +143,15 @@ model AuditFlag {
 }
 
 model User {
-  id            String       @id
-  name          String
-  email         String
-  emailVerified Boolean      @default(false)
-  image         String?
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  id            String       @id @default(uuid()) @map("id")
+  name          String       @map("name")
+  email         String       @map("email")
+  emailVerified Boolean      @default(false) @map("email_verified")
+  image         String?      @map("image")
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt      @map("updated_at")
   sessions      Session[]
-  accounts      Account[]
+  accounts      Account[]    
   members       Member[]
   invitations   Invitation[]
   reviewedInvoices Invoice[] @relation("ReviewedInvoices")
@@ -162,16 +162,16 @@ model User {
 }
 
 model Session {
-  id                   String   @id
-  expiresAt            DateTime
-  token                String
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
-  ipAddress            String?
-  userAgent            String?
-  userId               String
+  id                   String   @id @map("id")
+  expiresAt            DateTime @map("expires_at")
+  token                String   @map("token")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt      @map("updated_at")
+  ipAddress            String?  @map("ip_address")
+  userAgent            String?  @map("user_agent")
+  userId               String   @map("user_id") 
   user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  activeOrganizationId String?
+  activeOrganizationId String?   @map("active_organization_id")
 
   @@unique([token])
   @@index([userId])
@@ -179,45 +179,45 @@ model Session {
 }
 
 model Account {
-  id                    String    @id
-  accountId             String
-  providerId            String
-  userId                String
+  id                    String    @id @map("id")
+  accountId             String    @map("account_id")
+  providerId            String    @map("provider_id")
+  userId                String    @map("user_id")
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  accessToken           String?
-  refreshToken          String?
-  idToken               String?
-  accessTokenExpiresAt  DateTime?
-  refreshTokenExpiresAt DateTime?
-  scope                 String?
-  password              String?
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
+  accessToken           String?   @map("access_token")
+  refreshToken          String?   @map("refresh_token")
+  idToken               String?   @map("id_token")
+  accessTokenExpiresAt  DateTime? @map("access_token_expires_at")
+  refreshTokenExpiresAt DateTime? @map("refresh_token_expires_at")
+  scope                 String?   @map("scope")
+  password              String?   @map("password")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt     @map("updated_at")
 
   @@index([userId])
   @@map("account")
 }
 
 model Verification {
-  id         String   @id
-  identifier String
-  value      String
-  expiresAt  DateTime
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id         String   @id @map("id")
+  identifier String   @map("identifier")
+  value      String   @map("value")
+  expiresAt  DateTime @map("expires_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
   @@index([identifier])
   @@map("verification")
 }
 
 model Organization {
-  id              String            @id
-  name            String
-  slug            String
-  logo            String?
-  createdAt       DateTime
-  metadata        String?
-  members         Member[]
+  id              String            @id @map("id")
+  name            String           @map("name")
+  slug            String           @map("slug")
+  logo            String?          @map("logo")
+  createdAt       DateTime         @map("crated_at")
+  metadata        String?          @map("metadata")
+  members         Member[]         
   invitations     Invitation[]
   auditFlags       AuditFlag[]
   vendors          Vendor[]
@@ -229,13 +229,13 @@ model Organization {
 }
 
 model Member {
-  id             String       @id
-  organizationId String
+  id             String       @id @map("id")
+  organizationId String       @map("organization_id")
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  userId         String
+  userId         String       @map("user_id")
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role           String       @default("member")
-  createdAt      DateTime
+  role           String       @default("member") @map("role")
+  createdAt      DateTime     @map("created_at")
 
   @@index([organizationId])
   @@index([userId])
@@ -243,15 +243,15 @@ model Member {
 }
 
 model Invitation {
-  id             String       @id
-  organizationId String
+  id             String       @id @map("id")
+  organizationId String       @map("organization_id")
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  email          String
-  role           String?
-  status         String       @default("pending")
-  expiresAt      DateTime
-  createdAt      DateTime     @default(now())
-  inviterId      String
+  email          String       @map("email")
+  role           String?      @map("role")
+  status         String       @default("pending") @map("status")
+  expiresAt      DateTime     @map("expires_at")
+  createdAt      DateTime     @default(now())  @map("created_at")
+  inviterId      String       @map("inviter_id")
   user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
 
   @@index([organizationId])

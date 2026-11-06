@@ -1,29 +1,31 @@
-
-
-import { prisma } from "@/db";
+import "server-only";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { organization } from "better-auth/plugins";
 import { nextCookies } from "better-auth/next-js";
+import { organization } from "better-auth/plugins";
+import { prisma } from "@/db";
 
-
-const Auth = betterAuth({
-    database: prismaAdapter(prisma, {
-       provider: "postgresql",
-    }),
-
-    // 2. Authentication
-    emailAndPassword: {
-        enabled: true
+export const auth = betterAuth({
+  database: prismaAdapter(prisma, { provider: "postgresql" }),
+  emailAndPassword: { enabled: true },
+  databaseHooks: {
+    session: {
+      create: {
+        before: async (session) => {
+          const membership = await prisma.member.findFirst({
+            where: { userId: session.userId },
+            orderBy: { createdAt: "asc" },
+            select: { organizationId: true },
+          });
+          return {
+            data: {
+              ...session,
+              activeOrganizationId: membership?.organizationId ?? null,
+            },
+          };
+        },
+      },
     },
-
-    //
-    plugins: [
-       //Manages member seats, workspace invites, and company boundaries 
-       organization(),
-
-       nextCookies()
-    ],
+  },
+  plugins: [organization(), nextCookies()],
 });
-
-export default Auth;
