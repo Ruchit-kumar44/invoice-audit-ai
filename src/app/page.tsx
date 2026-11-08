@@ -1,8 +1,6 @@
 
-export default function Home() {
-  return (
-    <div className="">
-      hi weilcome to the project
-    </div>
-  );
+import { redirect } from "next/navigation";
+
+export default function HomePage() {
+  redirect("/dashboard");
 }

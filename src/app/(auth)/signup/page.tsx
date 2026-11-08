@@ -1,12 +1,19 @@
 import Link from "next/link";
 import { SignUpForm } from "@/components/auth/signupForm";
-import { redirectIfSignedIn } from "@/features/auth/session";
+import { Suspense } from "react";
+import { SignedInRedirect } from "@/components/auth/signedInRedirect";
 
-export default async function SignUpPage() {
-    await redirectIfSignedIn();
+
+export default function SignUpPage() {
+    
 
   return (
+  
+     
     <div className="space-y-6 bg-white/7 p-5 rounded-xl">
+     <Suspense fallback={null}>
+        <SignedInRedirect />
+      </Suspense>
       <div className="space-y-1">
         <h1 className="text-2xl font-semibold">Create your account</h1>
         <p className="text-sm text-muted-foreground">

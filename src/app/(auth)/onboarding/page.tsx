@@ -2,12 +2,17 @@ import { redirect } from "next/navigation";
 import { OnboardingForm } from "@/components/auth/onboardingForm";
 import { requireSession } from "@/features/auth/session";
 
-export default async function OnboardingPage() {
-  const session = await requireSession();
+export async function OnboardingGate(){
+   const session = await requireSession();
 
   if (session.session.activeOrganizationId) {
     redirect("/dashboard");
   }
+
+  return <OnboardingForm />
+}
+
+export default function OnboardingPage() {
 
   return (
     <div className="space-y-6">

@@ -1,13 +1,15 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { LoginForm } from "@/components/auth/login";
-import { redirectIfSignedIn } from "@/features/auth/session";
+import { SignedInRedirect } from "@/components/auth/signedInRedirect";
 
-
-export default async function LoginPage() {
-    await redirectIfSignedIn();
-
+export default function LoginPage() {
   return (
-    <div className="space-y-6 bg-white/7 p-5 rounded-xl">
+    <div className="space-y-6">
+      <Suspense fallback={null}>
+        <SignedInRedirect />
+      </Suspense>
+
       <div className="space-y-1">
         <h1 className="text-2xl font-semibold">Sign in</h1>
         <p className="text-sm text-muted-foreground">
