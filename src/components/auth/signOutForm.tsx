@@ -19,7 +19,7 @@ export function SignOutButton() {
   }
 
   return (
-    <Button variant="outline" size="sm" onClick={handleSignOut}>
+    <Button className="bg-background text-foreground" variant="outline" size="sm"  onClick={handleSignOut}>
       Sign out
     </Button>
   );

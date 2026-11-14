@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createAndActivateOrganization } from "@/features/auth/create-organization";
-import { organizationSchema, type OrganizationValues } from "@/schemas/auth";
+import { organizationSchema, OrganizationValues } from "@/schemas/auth/schema";
 
 export function OnboardingForm() {
   const router = useRouter();
