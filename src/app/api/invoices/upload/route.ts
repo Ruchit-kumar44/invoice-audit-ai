@@ -4,7 +4,7 @@ import crypto from "crypto";
 import { prisma } from "@/db";
 import { requireOrgSession } from "@/features/auth/session";
 
-// 4 MB cap (stays safely under Vercel's 4.5 MB serverless payload limit)
+// 4 MB cap 
 const MAX_FILE_SIZE = 4 * 1024 * 1024;
 
 // Map allowed MIME types to clean file extensions for Blob storage
@@ -25,7 +25,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2. READ AND VALIDATE THE FILE
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
 
